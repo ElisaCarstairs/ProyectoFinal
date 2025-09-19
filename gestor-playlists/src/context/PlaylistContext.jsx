@@ -1,28 +1,17 @@
-import { createContext, useReducer, useContext } from "react"
+import { createContext, useReducer, useContext, useEffect } from "react"
+import { songs as initialSongs } from "../data/songs.js"
 
 // Estado inicial
 const initialState = {
-  playlists: [],
   songs: [],
-  filter: "",
-  selectedSong: null,
+  playlists: [],
 }
 
-// Reducer para manejar acciones
+// Reducer
 function playlistReducer(state, action) {
   switch (action.type) {
-    case "ADD_PLAYLIST":
-      return { ...state, playlists: [...state.playlists, action.payload] }
-
-    case "SET_FILTER":
-      return { ...state, filter: action.payload }
-
     case "SET_SONGS":
       return { ...state, songs: action.payload }
-
-    case "SELECT_SONG":
-      return { ...state, selectedSong: action.payload }
-
     default:
       return state
   }
@@ -34,6 +23,11 @@ const PlaylistContext = createContext()
 export function PlaylistProvider({ children }) {
   const [state, dispatch] = useReducer(playlistReducer, initialState)
 
+  // Cargar canciones de ejemplo al iniciar
+  useEffect(() => {
+    dispatch({ type: "SET_SONGS", payload: initialSongs })
+  }, [])
+
   return (
     <PlaylistContext.Provider value={{ state, dispatch }}>
       {children}
@@ -41,7 +35,7 @@ export function PlaylistProvider({ children }) {
   )
 }
 
-// Hook para usar el contexto más fácil
+// Hook para consumir contexto
 export function usePlaylist() {
   return useContext(PlaylistContext)
 }

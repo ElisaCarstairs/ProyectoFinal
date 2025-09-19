@@ -46,7 +46,7 @@ export const songs = [
     id: "s7",
     title: "One Way",
     artist: "Twenty One Pilots",
-    album: "Breach"
+    album: "Breach",
     duration: 320,
     },
   {
