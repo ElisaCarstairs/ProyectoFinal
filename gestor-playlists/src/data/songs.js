@@ -1,0 +1,73 @@
+// src/data/songs.js
+export const songs = [
+  {
+    id: "s1",
+    title: "Anti-Hero",
+    artist: "Taylor Swift",
+    album: "Midnights",
+    duration: 200,
+  },
+  {
+    id: "s2",
+    title: "The Way It Was",
+    artist: "The Killers",
+    album: "Battle Born",
+    duration: 240,
+  },
+  {
+    id: "s3",
+    title: "Stolen Dance",
+    artist: "Milky Chance",
+    album: "Sadnecessary",
+    duration: 230,
+  },
+  {
+    id: "s4",
+    title: "Blinding Lights",
+    artist: "The Weeknd",
+    album: "After Hours",
+    duration: 200,
+  },
+  {
+    id: "s5",
+    title: "All Too Well",
+    artist: "Taylor Swift",
+    album: "Red",
+    duration: 200,
+  },
+  {
+    id: "s6",
+    title: "The Man",
+    artist: "The Killers",
+    album: "Battle Born",
+    duration: 200,
+  },
+  {
+    id: "s7",
+    title: "One Way",
+    artist: "Twenty One Pilots",
+    album: "Breach"
+    duration: 320,
+    },
+  {
+    id: "s8",
+    title: "Shape of You",
+    artist: "Ed Sheeran",
+    album: "X",
+    duration: 200,
+  },
+  {
+    id: "s9",
+    title: "Radioactive",
+    artist: "Imagine Dragons",
+    album: "Night Visions",
+    duration: 200,
+  },
+  {
+    id: "s10",
+    title: "Levitating",
+    artist: "Dua Lipa",
+    album: "Future Nostalgia",
+    duration: 200,
+  },
+];
