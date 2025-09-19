@@ -1,23 +1,37 @@
-import { createContext, useReducer, useContext, useEffect } from "react";
-import { songs as initialSongs } from "../data/songs.js";
+import { createContext, useContext, useReducer } from "react";
+
+const PlaylistContext = createContext();
 
 const initialState = {
-  songs: [],
-  playlists: [], // agregamos playlists aquí
+  playlists: []
 };
 
 function playlistReducer(state, action) {
   switch (action.type) {
-    case "SET_SONGS":
-      return { ...state, songs: action.payload };
-
     case "ADD_PLAYLIST":
       return { ...state, playlists: [...state.playlists, action.payload] };
 
     case "REMOVE_PLAYLIST":
+      return { ...state, playlists: state.playlists.filter(pl => pl.id !== action.payload) };
+
+    case "ADD_SONG":
       return {
         ...state,
-        playlists: state.playlists.filter((p) => p.id !== action.payload),
+        playlists: state.playlists.map(pl =>
+          pl.id === action.payload.playlistId
+            ? { ...pl, songs: [...pl.songs, action.payload.song] }
+            : pl
+        )
+      };
+
+    case "REMOVE_SONG":
+      return {
+        ...state,
+        playlists: state.playlists.map(pl =>
+          pl.id === action.payload.playlistId
+            ? { ...pl, songs: pl.songs.filter(s => s.id !== action.payload.songId) }
+            : pl
+        )
       };
 
     default:
@@ -25,23 +39,8 @@ function playlistReducer(state, action) {
   }
 }
 
-// Crear contexto
-const PlaylistContext = createContext();
-
 export function PlaylistProvider({ children }) {
   const [state, dispatch] = useReducer(playlistReducer, initialState);
-
-  useEffect(() => {
-    const storedPlaylists = localStorage.getItem("playlists");
-    if (storedPlaylists) {
-      dispatch({ type: "SET_PLAYLISTS", payload: JSON.parse(storedPlaylists) });
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("playlists", JSON.stringify(state.playlists));
-  }, [state.playlists]);
-
   return (
     <PlaylistContext.Provider value={{ state, dispatch }}>
       {children}
@@ -49,7 +48,6 @@ export function PlaylistProvider({ children }) {
   );
 }
 
-// Hook para consumir contexto
 export function usePlaylist() {
   return useContext(PlaylistContext);
 }
