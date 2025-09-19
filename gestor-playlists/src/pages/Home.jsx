@@ -51,6 +51,31 @@ export default function Home() {
           </li>
         ))}
       </ul>
+<ul className="space-y-4">
+  {songs.map((song) => (
+    <li
+      key={song.id}
+      className="p-4 border rounded-lg bg-white shadow hover:shadow-lg transition-shadow flex justify-between items-center"
+    >
+      <div>
+        <p className="font-semibold text-lg text-gray-800">{song.title}</p>
+        <p className="text-sm text-gray-500">{song.artist} - {song.album}</p>
+      </div>
+      {song.preview && (
+        <audio controls className="w-36">
+          <source src={song.preview} type="audio/mpeg" />
+          Tu navegador no soporta audio.
+        </audio>
+      )}
+    </li>
+  ))}
+</ul>
+
+<div className="bg-red-500 text-white p-4">
+  Hola Tailwind
+</div>
+
+
     </div>
   );
 }
