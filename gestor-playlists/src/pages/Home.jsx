@@ -1,43 +1,44 @@
-import { useState } from "react";
-import SearchBar from "../components/SearchBar.jsx";
+import React, { useState } from "react";
 import SongCard from "../components/SongCard.jsx";
-import { fetchSongs } from "../services/api.js";
 
 export default function Home() {
   const [query, setQuery] = useState("");
   const [songs, setSongs] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
-  const handleSearch = async () => {
+  const fetchSongs = async () => {
     if (!query.trim()) return;
-    setLoading(true);
-    setError(null);
-
     try {
-      const results = await fetchSongs(query);
-      setSongs(results);
-    } catch (err) {
-      setError("Ocurrió un error al buscar canciones.");
-      setSongs([]);
-    } finally {
-      setLoading(false);
+      const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&limit=15`);
+      const data = await response.json();
+      setSongs(data.results);
+    } catch (error) {
+      console.error("Error fetching songs:", error);
     }
   };
 
   return (
-    <div>
-      <h2 className="text-2xl font-semibold mb-4">Canciones disponibles</h2>
-      <SearchBar query={query} setQuery={setQuery} onSearch={handleSearch} loading={loading} />
+    <div className="p-6 max-w-5xl mx-auto">
+      <h2 className="text-2xl font-bold mb-4">Canciones disponibles</h2>
 
-      {error && <p className="text-red-500 mb-4">{error}</p>}
-      {!error && songs.length === 0 && !loading && (
-        <p className="text-gray-500 mb-4">No hay canciones para mostrar.</p>
-      )}
+      <div className="flex gap-2 mb-6">
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Buscar canciones..."
+          className="flex-1 border p-2 rounded"
+        />
+        <button
+          onClick={fetchSongs}
+          className="bg-blue-500 text-white px-4 py-2 rounded"
+        >
+          Buscar
+        </button>
+      </div>
 
-      <div className="space-y-2">
-        {songs.map((song) => (
-          <SongCard key={song.id} song={song} />
+      <div className="flex flex-col gap-4">
+        {songs.map(song => (
+          <SongCard key={song.trackId} song={song} />
         ))}
       </div>
     </div>
