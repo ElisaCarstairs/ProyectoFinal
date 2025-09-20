@@ -1,103 +1,93 @@
-import React, { useState } from "react";
+// src/components/SongCard.jsx
+import React, { useState, useMemo } from "react";
 import { usePlaylist } from "../context/PlaylistContext.jsx";
+import { usePlayer } from "../context/PlayerContext.jsx";
 
 export default function SongCard({ song }) {
   const { state, dispatch } = usePlaylist();
+  const { playTrack, addToQueue } = usePlayer();
   const [showModal, setShowModal] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState("");
-  const [addedMessage, setAddedMessage] = useState(""); // ✨ estado dinámico
-  const [audio] = useState(new Audio(song.previewUrl));
+  const [confirmText, setConfirmText] = useState("");
 
-  const handlePlay = () => audio.play();
-  const handlePause = () => audio.pause();
+  const isInAnyPlaylist = useMemo(() => {
+    return state.playlists.some((pl) => pl.songs.some((s) => s.trackId === song.trackId));
+  }, [state.playlists, song.trackId]);
 
-  const handleAdd = (playlistId) => {
-    if (!playlistId) return;
+  const handleAddToExisting = (playlistId) => {
     dispatch({ type: "ADD_SONG", payload: { playlistId, song } });
-
-    // Cambiar texto del botón
-    setAddedMessage(`Agregada a "${state.playlists.find(pl => pl.id === playlistId)?.name}"`);
-    setTimeout(() => setAddedMessage(""), 3000); // vuelve al estado original
+    setConfirmText(`Añadida a "${state.playlists.find((p) => p.id === playlistId)?.name}"`);
+    setTimeout(() => setConfirmText(""), 2500);
     setShowModal(false);
-    setNewPlaylistName("");
   };
 
   const handleCreateAndAdd = () => {
-    if (!newPlaylistName.trim()) return;
+    const name = newPlaylistName.trim();
+    if (!name) return;
     const id = Date.now().toString();
-    dispatch({
-      type: "ADD_PLAYLIST",
-      payload: { id, name: newPlaylistName, songs: [song] },
-    });
-
-    setAddedMessage(`Agregada a "${newPlaylistName}"`);
-    setTimeout(() => setAddedMessage(""), 3000);
-    setShowModal(false);
+    dispatch({ type: "ADD_PLAYLIST", payload: { id, name, songs: [song] } });
+    setConfirmText(`Playlist "${name}" creada`);
+    setTimeout(() => setConfirmText(""), 2500);
     setNewPlaylistName("");
+    setShowModal(false);
   };
 
   return (
-    <div className="flex gap-4 p-4 border rounded bg-white shadow-sm">
+    <div className="flex gap-4 p-4 border rounded bg-white shadow-sm items-center w-full">
       <img src={song.artworkUrl100} alt={song.trackName} className="w-20 h-20 object-cover rounded" />
-      <div className="flex-1">
-        <h3 className="font-bold">{song.trackName}</h3>
-        <p className="text-gray-600">{song.artistName}</p>
-        <p className="text-gray-500 text-sm">{song.collectionName}</p>
-        {song.previewUrl && (
-          <div className="mt-2 flex gap-2">
-            <button onClick={handlePlay} className="bg-green-500 text-white px-2 py-1 rounded">▶️</button>
-            <button onClick={handlePause} className="bg-red-500 text-white px-2 py-1 rounded">⏸️</button>
-          </div>
-        )}
+      <div className="flex-1 min-w-0">
+        <h3 className="font-semibold truncate">{song.trackName}</h3>
+        <p className="text-sm text-gray-600 truncate">{song.artistName}</p>
+        <p className="text-xs text-gray-500 truncate">{song.collectionName}</p>
+
+        <div className="mt-2 flex gap-2">
+          <button onClick={() => playTrack(song)} className="px-3 py-1 rounded bg-indigo-600 text-white hover:bg-indigo-700">
+            ▶ Reproducir
+          </button>
+          <button onClick={() => addToQueue(song)} className="px-3 py-1 rounded bg-purple-600 text-white hover:bg-purple-700">
+            ➕ Añadir a cola
+          </button>
+          <button
+            onClick={() => setShowModal(true)}
+            className={`px-4 py-1 rounded text-white ${confirmText || isInAnyPlaylist ? "bg-green-500" : "bg-blue-500"} hover:opacity-90`}
+          >
+            {confirmText || (isInAnyPlaylist ? "En playlists" : "Añadir a playlist")}
+          </button>
+        </div>
       </div>
-      
-      <button
-        onClick={() => setShowModal(true)}
-        className={`px-4 py-2 rounded ${addedMessage ? 'bg-green-500 text-white' : 'bg-blue-500 text-white'}`}
-      >
-        {addedMessage || "Añadir a playlist"}
-      </button>
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded shadow-md w-full max-w-md">
-            <h4 className="text-xl font-bold mb-4">Selecciona o crea una playlist</h4>
-
-            {state.playlists.length > 0 && (
-              <div className="flex flex-col gap-2 mb-4 max-h-48 overflow-y-auto">
-                {state.playlists.map(pl => (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded shadow-lg w-full max-w-md p-6">
+            <h4 className="text-lg font-semibold mb-3">Selecciona o crea una playlist</h4>
+            {state.playlists.length > 0 ? (
+              <div className="flex flex-col gap-2 mb-4 max-h-48 overflow-auto">
+                {state.playlists.map((pl) => (
                   <button
                     key={pl.id}
-                    onClick={() => handleAdd(pl.id)}
-                    className="border p-2 rounded hover:bg-gray-100 text-left"
+                    onClick={() => handleAddToExisting(pl.id)}
+                    className="text-left border rounded p-2 hover:bg-gray-100"
                   >
-                    {pl.name}
+                    {pl.name} ({pl.songs.length})
                   </button>
                 ))}
               </div>
+            ) : (
+              <p className="text-sm text-gray-500 mb-4">No hay playlists. Crea una ahora:</p>
             )}
-
             <div className="flex gap-2">
               <input
-                type="text"
-                placeholder="Nueva playlist"
                 value={newPlaylistName}
                 onChange={(e) => setNewPlaylistName(e.target.value)}
-                className="flex-1 border p-2 rounded"
+                placeholder="Nombre de la playlist"
+                className="flex-1 border rounded p-2"
               />
-              <button
-                onClick={handleCreateAndAdd}
-                className="bg-green-500 text-white px-4 py-2 rounded"
-              >
+              <button onClick={handleCreateAndAdd} className="bg-green-500 text-white px-4 py-2 rounded">
                 Crear & Añadir
               </button>
             </div>
-
-            <button
-              onClick={() => setShowModal(false)}
-              className="mt-4 text-gray-500 hover:underline"
-            >
+            <button onClick={() => setShowModal(false)} className="mt-4 text-sm text-gray-500 hover:underline">
               Cancelar
             </button>
           </div>
