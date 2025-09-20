@@ -84,6 +84,17 @@ Proyecto de **Gestor de Playlists tipo iTunes** construido con **React + Vite + 
 
 ---
 
+## Scripts importantes
+
+```bash
+npm install
+npm run dev
+npm run build
+npm run preview
+```bash
+
+---
+
 ## Estructura considerada para el proeycto
 
 gestor-playlists/
@@ -116,17 +127,3 @@ gestor-playlists/
 ├─ tailwind.config.js
 ├─ postcss.config.js
 └─ vite.config.js
-
----
-
-## Scripts importantes
-
-```bash
-npm install
-npm run dev
-npm run build
-npm run preview
-```bash
-
----
-
