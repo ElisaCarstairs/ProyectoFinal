@@ -1,20 +1,24 @@
-//context/AuthContext.jsx
-
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
-  const login = (username, password) => {
-    if (username && password) {
-      setUser({ username });
-    }
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) setUser(JSON.parse(storedUser));
+  }, []);
+
+  const login = (username) => {
+    const userObj = { name: username };
+    setUser(userObj);
+    localStorage.setItem("user", JSON.stringify(userObj));
   };
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem("user");
   };
 
   return (
@@ -24,6 +28,4 @@ export function AuthProvider({ children }) {
   );
 }
 
-export function useAuth() {
-  return useContext(AuthContext);
-}
+export const useAuth = () => useContext(AuthContext);
